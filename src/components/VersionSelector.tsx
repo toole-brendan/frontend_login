@@ -1,8 +1,7 @@
 import React from 'react';
-import { Box, Card, Typography } from '@mui/material';
+import { Box, Paper, Typography, Button } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import type { Theme } from '@mui/material/styles';
-import { fontFamilies, fontWeights } from '../styles/theme-constants';
 import '../styles/global.css';
 
 const LogoBox = styled(Box)(({ theme }: { theme: Theme }) => ({
@@ -33,30 +32,35 @@ const ContentContainer = styled(Box)({
 const TitleTypography = styled(Typography)({
   color: 'white',
   textAlign: 'center',
-  userSelect: 'none',
   fontSize: '1.25rem',
   fontWeight: 300,
   letterSpacing: '0.02em',
 });
 
-const VersionCard = styled(Card)(({ theme }) => ({
-  padding: theme.spacing(2, 3),
-  backgroundColor: theme.palette.grey[900],
-  cursor: 'pointer',
+const VersionCard = styled(Paper)(({ theme }) => ({
+  backgroundColor: '#000000',
   borderRadius: 0,
-  minWidth: '200px',
-  transition: 'background-color 0.2s ease-in-out',
-  userSelect: 'none',
+  border: '1px solid rgba(25, 118, 210, 0.5)',
+  minWidth: '140px',
+  cursor: 'pointer',
+  transition: 'all 0.2s ease-in-out',
   '&:hover': {
-    backgroundColor: theme.palette.grey[800],
+    border: '1px solid #1976d2',
+    backgroundColor: 'rgba(25, 118, 210, 0.04)',
+  },
+  '& .card-header': {
+    padding: theme.spacing(1, 2),
+    textAlign: 'center',
+    '& h6': {
+      fontWeight: 500,
+      textTransform: 'uppercase',
+      letterSpacing: '0.1em',
+      color: '#1976d2',
+      margin: 0,
+      fontSize: '0.875rem',
+    },
   },
 }));
-
-const StyledTypography = styled(Typography)({
-  color: 'text.primary',
-  textAlign: 'center',
-  userSelect: 'none',
-});
 
 const VersionSelector: React.FC = () => {
   const handleVersionSelect = (version: 'civilian' | 'defense') => {
@@ -75,6 +79,7 @@ const VersionSelector: React.FC = () => {
         alignItems: 'center',
         justifyContent: 'center',
         p: 3,
+        backgroundColor: '#000000',
       }}
     >
       <ContentContainer>
@@ -91,19 +96,19 @@ const VersionSelector: React.FC = () => {
             display: 'flex',
             gap: 4,
             justifyContent: 'center',
-            alignItems: 'center',
+            alignItems: 'stretch',
           }}
         >
           <VersionCard onClick={() => handleVersionSelect('defense')}>
-            <StyledTypography variant="body1">
-              Defense
-            </StyledTypography>
+            <div className="card-header">
+              <Typography variant="h6">Defense</Typography>
+            </div>
           </VersionCard>
 
           <VersionCard onClick={() => handleVersionSelect('civilian')}>
-            <StyledTypography variant="body1">
-              Civilian
-            </StyledTypography>
+            <div className="card-header">
+              <Typography variant="h6">Civilian</Typography>
+            </div>
           </VersionCard>
         </Box>
       </ContentContainer>

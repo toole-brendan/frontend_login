@@ -35,13 +35,22 @@ The build output will be in the `dist` directory.
 
 Your S3 bucket (`www.handreceipt.com`) should be organized as follows:
 ```
-www.handreceipt.com/
-├── index.html          # Login selector (root)
-├── assets/            # Login selector assets
-├── civilian/          # Civilian version
-│   └── index.html
-└── defense/           # Defense version
-    └── index.html
+www.handreceipt.com (CloudFront Distribution)
+├── / (root - frontend_login project)
+│   ├── index.html           # Version selector landing page
+│   └── assets/              # Login selector assets
+│       ├── index-*.js       # Login selector JavaScript
+│       └── index-*.css      # Login selector styles
+│   
+├── /defense (frontend_defense project)
+│   ├── index.html           # Defense app landing page
+│   └── assets/              # Defense app assets
+│       ├── *.js             # Defense app JavaScript modules
+│       └── *.css            # Defense app styles
+│
+└── /civilian (future project)
+    ├── index.html           # Civilian app landing page (not yet deployed)
+    └── assets/              # Civilian app assets (not yet deployed)
 ```
 
 ## AWS S3 Setup
@@ -69,3 +78,20 @@ www.handreceipt.com/
 - `yarn build` - Create production build
 - `yarn lint` - Run ESLint
 - `yarn preview` - Preview production build locally 
+
+Flow:
+1. User visits handreceipt.com
+   └── Shows version selector (frontend_login)
+       ├── "Defense" button → redirects to handreceipt.com/defense
+       └── "Civilian" button → redirects to handreceipt.com/civilian
+
+Local Development Structure:
+/Users/brendantoole/projects/
+├── frontend_login/          # Version selector project
+│   └── dist/               # Built files that go to S3 root
+│
+├── frontend_defense/        # Defense version project
+│   └── dist/               # Built files that go to S3 /defense/
+│
+└── frontend_civilian/       # Future civilian version project
+    └── dist/               # Will go to S3 /civilian/ 
