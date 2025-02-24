@@ -95,3 +95,156 @@ Local Development Structure:
 │
 └── frontend_civilian/       # Future civilian version project
     └── dist/               # Will go to S3 /civilian/ 
+
+## Deployment Instructions
+
+### Prerequisites
+- AWS CLI installed and configured with appropriate permissions
+- Access to all project repositories:
+  - `frontend_login` (Version selector)
+  - `frontend_defense` (Defense version)
+  - `frontend_civilian` (Civilian version - future)
+
+### Step 1: Build All Projects
+
+1. Build the login selector (root):
+```bash
+cd /Users/brendantoole/projects/frontend_login
+yarn build
+```
+
+2. Build the defense version:
+```bash
+cd /Users/brendantoole/projects/frontend_defense
+yarn build
+```
+
+3. Build the civilian version (when available):
+```bash
+cd /Users/brendantoole/projects/frontend_civilian
+yarn build
+```
+
+### Step 2: Deploy to AWS S3
+
+#### Deploy Login Selector (Root)
+```bash
+cd /Users/brendantoole/projects/frontend_login
+
+# Upload index.html with no caching
+aws s3 cp dist/index.html s3://www.handreceipt.com/index.html \
+  --cache-control "no-cache" \
+  --content-type "text/html"
+
+# Upload JavaScript files with 1-year cache
+aws s3 cp dist/assets/ s3://www.handreceipt.com/assets/ \
+  --recursive \
+  --cache-control "max-age=31536000" \
+  --content-type "application/javascript" \
+  --exclude "*" \
+  --include "*.js"
+
+# Upload CSS files with 1-year cache
+aws s3 cp dist/assets/ s3://www.handreceipt.com/assets/ \
+  --recursive \
+  --cache-control "max-age=31536000" \
+  --content-type "text/css" \
+  --exclude "*" \
+  --include "*.css"
+```
+
+#### Deploy Defense Version
+```bash
+cd /Users/brendantoole/projects/frontend_defense
+
+# Upload index.html with no caching
+aws s3 cp dist/index.html s3://www.handreceipt.com/defense/index.html \
+  --cache-control "no-cache" \
+  --content-type "text/html"
+
+# Upload JavaScript files with 1-year cache
+aws s3 cp dist/assets/ s3://www.handreceipt.com/defense/assets/ \
+  --recursive \
+  --cache-control "max-age=31536000" \
+  --content-type "application/javascript" \
+  --exclude "*" \
+  --include "*.js"
+
+# Upload CSS files with 1-year cache
+aws s3 cp dist/assets/ s3://www.handreceipt.com/defense/assets/ \
+  --recursive \
+  --cache-control "max-age=31536000" \
+  --content-type "text/css" \
+  --exclude "*" \
+  --include "*.css"
+```
+
+#### Deploy Civilian Version (Future)
+```bash
+cd /Users/brendantoole/projects/frontend_civilian
+
+# Upload index.html with no caching
+aws s3 cp dist/index.html s3://www.handreceipt.com/civilian/index.html \
+  --cache-control "no-cache" \
+  --content-type "text/html"
+
+# Upload JavaScript files with 1-year cache
+aws s3 cp dist/assets/ s3://www.handreceipt.com/civilian/assets/ \
+  --recursive \
+  --cache-control "max-age=31536000" \
+  --content-type "application/javascript" \
+  --exclude "*" \
+  --include "*.js"
+
+# Upload CSS files with 1-year cache
+aws s3 cp dist/assets/ s3://www.handreceipt.com/civilian/assets/ \
+  --recursive \
+  --cache-control "max-age=31536000" \
+  --content-type "text/css" \
+  --exclude "*" \
+  --include "*.css"
+```
+
+### Step 3: Invalidate CloudFront Cache
+
+After deploying any changes, invalidate the CloudFront cache to ensure the latest content is served:
+
+```bash
+# Invalidate all paths (when deploying multiple projects)
+aws cloudfront create-invalidation \
+  --distribution-id E3T7VX6HV95Q5O \
+  --paths "/*"
+
+# Or invalidate specific paths (when deploying single project)
+aws cloudfront create-invalidation \
+  --distribution-id E3T7VX6HV95Q5O \
+  --paths "/defense/*"  # for defense version
+  # or "/civilian/*"    # for civilian version
+  # or "/"             # for login selector
+```
+
+### Deployment Best Practices
+
+1. **Order of Deployment**
+   - Deploy the version-specific projects first (defense, civilian)
+   - Deploy the login selector last
+   - This ensures all destinations are available before updating the selector
+
+2. **Testing**
+   - After deployment, test each path:
+     - `https://www.handreceipt.com` (login selector)
+     - `https://www.handreceipt.com/defense`
+     - `https://www.handreceipt.com/civilian` (when available)
+   - Verify that navigation between versions works correctly
+   - Check that assets load without MIME type errors
+   - Test on both desktop and mobile browsers
+
+3. **Troubleshooting**
+   - If assets fail to load, check MIME types in S3
+   - If old content is shown, verify CloudFront invalidation completed
+   - If routing issues occur, check CloudFront's error page settings
+
+4. **Monitoring**
+   - Watch CloudFront distribution metrics
+   - Monitor S3 bucket metrics
+   - Check CloudWatch logs for any errors 
